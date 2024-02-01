@@ -4,8 +4,8 @@ Build a PyTorch model that can be used for prediction served out via FastAPI
 
 import io
 import json
-#from torchvision import models
-#import torchvision.transforms as transforms
+from torchvision import models
+import torchvision.transforms as transforms
 from PIL import Image
 import fastapi
 from fastapi import File, UploadFile, Request

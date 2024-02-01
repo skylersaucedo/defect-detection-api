@@ -12,6 +12,6 @@ Pillow==9.3.0
 
 torch==1.2.0+cpu
 #torch
-torchvision
+torchvision==0.11.3+cu113
 python-multipart==0.0.5
 opencv-contrib-python==4.1.0.25

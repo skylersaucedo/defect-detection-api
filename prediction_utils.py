@@ -1,6 +1,7 @@
 """
 Prediction Utils for API testing
 Pytorch RetinaNet Object detector
+Refactor once API endpoint works.
 """
 #import datetime
 import os

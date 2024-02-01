@@ -4,8 +4,8 @@ Build a PyTorch model that can be used for prediction served out via FastAPI
 
 import io
 import json
-from torchvision import models
-import torchvision.transforms as transforms
+#from torchvision import models
+#import torchvision.transforms as transforms
 from PIL import Image
 import fastapi
 from fastapi import File, UploadFile, Request
@@ -14,6 +14,7 @@ import torch
 from fastapi.responses import RedirectResponse, HTMLResponse
 import base64
 import cv2
+import numpy as np
 
 from prediction_utils import get_args_parser, ddd
 
@@ -26,22 +27,25 @@ model.cuda() # send weights to gpu, may not work...
 
 model_class_index = json.load(open("class_index.json", encoding="utf-8"))
 
-def transform_image(image_bytes):
-    my_transforms = transforms.Compose(
-        [
-            transforms.Resize(256),
-            transforms.CenterCrop(256),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-        ]
-    )
-    image = Image.open(io.BytesIO(image_bytes))
-    return my_transforms(image).unsqueeze(0)
+# def transform_image(image_bytes):
+#     my_transforms = transforms.Compose(
+#         [
+#             transforms.Resize(256),
+#             transforms.CenterCrop(256),
+#             transforms.ToTensor(),
+#             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+#         ]
+#     )
+#     image = Image.open(io.BytesIO(image_bytes))
+#     return my_transforms(image).unsqueeze(0)
 
 
 def get_prediction(image_bytes):
     
-    tensor = transform_image(image_bytes=image_bytes)
+    #tensor = transform_image(image_bytes=image_bytes)
+    
+    image = Image.open(io.BytesIO(image_bytes))
+    tensor = image.unsqueeze(0)
     outputs = model(tensor)
     _, y_hat = torch.max(outputs.data,1)
     model_pred_idx = str(y_hat.item())
@@ -50,8 +54,10 @@ def get_prediction(image_bytes):
 
 def get_inference(image_bytes):
     
-    tensor = transform_image(image_bytes=image_bytes)
-    img_c = cv2.cvtColor(img_r, cv2.COLOR_BGR2RGB)
+    #tensor = transform_image(image_bytes=image_bytes)
+    image = Image.open(io.BytesIO(image_bytes))
+    #tensor = image.unsqueeze(0)
+    img_c = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     img_t = img_c.transpose([2,0,1])
 
@@ -60,7 +66,7 @@ def get_inference(image_bytes):
     img_t = torch.FloatTensor(img_t)
 
     print('shape of img_t ', np.shape(img_t))
-
+    device = torch.device("cuda")
     img_t = img_t.to(device)
     detections = model(img_t)[0]
 
@@ -70,15 +76,24 @@ def get_inference(image_bytes):
 
     preds = []
 
-    inputname = input_image_path.split('\\')
+    #inputname = input_image_path.split('\\')
     
     for i in range(0, len(detections["boxes"])):
         confidence = detections["scores"][i]
 
         #print('confidence: ', confidence)
 
-        con = 0.45#0.5#0.8
+        con = 0.8#0.5#0.8
+        COLORS = np.random.uniform(150, 255, size=(len(CLASSES), 3))
+        CLASSES = [
+            'scratch', 
+            'dent', 
+            'paint', 
+            'pit', 
+            'none'
+                ]
 
+        inputname = 'TEST!'
         if confidence > con:
 
             idx = int(detections["labels"][i])
@@ -100,6 +115,7 @@ def get_inference(image_bytes):
             preds.append([inputname[-1],startX, startY, endX, endY, CLASSES[idx-1], float(confidence * 100)])
             
     print(' [PREDICTIONS: ]', prediction_labels, prediction_vals)
+    return 'sample_model_pred', 'glass'
 
 
 

@@ -13,7 +13,7 @@ import uvicorn
 import torch
 from fastapi.responses import RedirectResponse, HTMLResponse
 import base64
-import cv2
+#import cv2
 import numpy as np
 
 from prediction_utils import get_args_parser, ddd
@@ -57,9 +57,10 @@ def get_inference(image_bytes):
     #tensor = transform_image(image_bytes=image_bytes)
     image = Image.open(io.BytesIO(image_bytes))
     #tensor = image.unsqueeze(0)
-    img_c = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    #img_c = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    img_t = img_c.transpose([2,0,1])
+    #img_t = img_c.transpose([2,0,1])
+    img_t = image.transpose([2,0,1])
 
     img_t = np.expand_dims(img_t, axis=0)
     img_t = img_t/255.0
@@ -106,11 +107,11 @@ def get_inference(image_bytes):
             #print("[PREDICTION:] {}".format(label))
             prediction_labels.append(label)
             # draw the bounding box and label on the image
-            cv2.rectangle(img_c, (startX, startY), (endX, endY),
-                COLORS[idx-1], 2)
-            y = startY - 15 if startY - 15 > 15 else startY + 15
-            cv2.putText(img_c, label, (startX, y),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, COLORS[idx-1], 5)
+            # cv2.rectangle(img_c, (startX, startY), (endX, endY),
+            #     COLORS[idx-1], 2)
+            # y = startY - 15 if startY - 15 > 15 else startY + 15
+            # cv2.putText(img_c, label, (startX, y),
+            #     cv2.FONT_HERSHEY_SIMPLEX, 1, COLORS[idx-1], 5)
             
             preds.append([inputname[-1],startX, startY, endX, endY, CLASSES[idx-1], float(confidence * 100)])
             

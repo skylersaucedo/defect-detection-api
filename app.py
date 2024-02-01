@@ -16,7 +16,7 @@ import base64
 #import cv2
 import numpy as np
 
-from prediction_utils import get_args_parser, ddd
+#from prediction_utils import get_args_parser, ddd
 
 app = fastapi.FastAPI()
 

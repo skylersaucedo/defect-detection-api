@@ -4,4 +4,4 @@ Pillow
 torch
 torchvision
 python-multipart
-opencv-python
+opencv-python>=4.1.1
